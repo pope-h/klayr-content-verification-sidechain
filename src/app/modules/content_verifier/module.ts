@@ -16,10 +16,15 @@ export class ContentVerifierModule extends Modules.BaseModule {
     public method = new ContentVerifierMethod(this.stores, this.events);
     public commands = [new CreateContentCommand(this.stores, this.events)];
 
+    private maxContentLength: number;
+    private minReputationForVerification: number;
+
 	public constructor() {
         super();
         this.stores.register(ContentStore, new ContentStore(this.name, 0));
         this.stores.register(StatsStore, new StatsStore(this.name, 1));
+        this.maxContentLength = 1000;
+        this.minReputationForVerification = 0.5;
     }
 
 	// public constructor() {
@@ -160,9 +165,17 @@ export class ContentVerifierModule extends Modules.BaseModule {
     }
 
     // Lifecycle hooks
-    // public async init(_args: Modules.ModuleInitArgs): Promise<void> {
-	// 	// initialize this module when starting a node
-	// }
+    // eslint-disable-next-line @typescript-eslint/require-await
+    public async init(_args: Modules.ModuleInitArgs): Promise<void> {
+        const { moduleConfig }: { moduleConfig?: { maxContentLength?: number; minReputationForVerification?: number } } = _args;
+    
+        if (moduleConfig) {
+            this.maxContentLength = moduleConfig.maxContentLength ?? this.maxContentLength;
+            this.minReputationForVerification = moduleConfig.minReputationForVerification ?? this.minReputationForVerification;
+        }
+    
+        // Other initialization logic...
+    }
 
 	// public async insertAssets(_context: StateMachine.InsertAssetContext) {
 	// 	// initialize block generation, add asset
