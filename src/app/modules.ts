@@ -4,5 +4,5 @@ import { ContentVerifierModule } from "./modules/content_verifier/module";
 
 export const registerModules = (_app: Application): void => {
 
-    app.registerModule(new ContentVerifierModule());
+    _app.registerModule(new ContentVerifierModule());
 };
