@@ -1,9 +1,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 import {
-	Modules,
-	StateMachine,
+    Modules
 } from 'klayr-sdk';
+import { CreateContentCommand } from "./commands/create_content_command";
 import { ContentVerifierEndpoint } from './endpoint';
 import { ContentVerifierMethod } from './method';
 import { ContentStore } from './stores/content';
@@ -14,7 +14,7 @@ export class ContentVerifierModule extends Modules.BaseModule {
     public id = 1000;
     public endpoint = new ContentVerifierEndpoint(this.stores, this.offchainStores);
     public method = new ContentVerifierMethod(this.stores, this.events);
-    public commands = [];
+    public commands = [new CreateContentCommand(this.stores, this.events)];
 
 	public constructor() {
         super();
