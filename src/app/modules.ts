@@ -2,7 +2,7 @@
 import { Application } from 'klayr-sdk';
 import { ContentVerifierModule } from "./modules/content_verifier/module";
 
-export const registerModules = (_app: Application): void => {
+export const registerModules = (app: Application): void => {
 
-    _app.registerModule(new ContentVerifierModule());
+    app.registerModule(new ContentVerifierModule());
 };

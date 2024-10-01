@@ -41,8 +41,8 @@ export class CreateContentCommand extends Modules.BaseCommand {
 		return { status: StateMachine.VerifyStatus.OK };
 	}
 
-	public async execute(_context: StateMachine.CommandExecuteContext<Params>): Promise<void> {
-		const { hash, userId, timestamp } = _context.params;
+	public async execute(context: StateMachine.CommandExecuteContext<Params>): Promise<void> {
+		const { hash, userId, timestamp } = context.params;
         
         const contentStore = this.stores.get(ContentStore);
         const statsStore = this.stores.get(StatsStore);
@@ -55,17 +55,17 @@ export class CreateContentCommand extends Modules.BaseCommand {
         };
 
         // Save content
-		await contentStore.set(_context, Buffer.from(hash), newContent);
+		await contentStore.set(context, Buffer.from(hash), newContent);
 
 		// Update stats
 		let stats: ContentStats;
 		try {
-			stats = await statsStore.get(_context, Buffer.from('globalStats'));
+			stats = await statsStore.get(context, Buffer.from('globalStats'));
 		} catch (error) {
 			stats = { totalContents: 0, verifiedContents: 0 };
 		}
 
         stats.totalContents += 1;
-		await statsStore.set(_context, Buffer.from('globalStats'), stats);
+		await statsStore.set(context, Buffer.from('globalStats'), stats);
 	}
 }

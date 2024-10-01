@@ -166,8 +166,8 @@ export class ContentVerifierModule extends Modules.BaseModule {
 
     // Lifecycle hooks
     // eslint-disable-next-line @typescript-eslint/require-await
-    public async init(_args: Modules.ModuleInitArgs): Promise<void> {
-        const { moduleConfig }: { moduleConfig?: { maxContentLength?: number; minReputationForVerification?: number } } = _args;
+    public async init(args: Modules.ModuleInitArgs): Promise<void> {
+        const { moduleConfig }: { moduleConfig?: { maxContentLength?: number; minReputationForVerification?: number } } = args;
     
         if (moduleConfig) {
             this.maxContentLength = moduleConfig.maxContentLength ?? this.maxContentLength;
