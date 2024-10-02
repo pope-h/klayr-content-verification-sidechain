@@ -7,7 +7,7 @@ export interface ContentEntry {
 }
 
 export const ContentEntrySchema = {
-        $id: '/contentVerifier/content',
+        $id: '/contentVerifier/contentEntry',
         type: 'object',
         required: ['userId', 'timestamp', 'verified'],
         properties: {

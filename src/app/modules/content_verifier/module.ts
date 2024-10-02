@@ -1,17 +1,23 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/member-ordering */
 import {
-    Modules
+    Modules, StateMachine
 } from 'klayr-sdk';
 import { CreateContentCommand } from "./commands/create_content_command";
 import { ContentVerifierEndpoint } from './endpoint';
 import { ContentVerifierMethod } from './method';
 import { ContentStore } from './stores/content';
 import { StatsStore } from './stores/stats';
+import { UserReputationStore } from './stores/user_reputation';
 
 export class ContentVerifierModule extends Modules.BaseModule {
-	public projectName = 'contentVerifier';
-    public id = 1000;
+	public static readonly MODULE_NAME = 'contentVerifier';
+    public static readonly MODULE_ID = 1000;
+
+    public get name() {
+        return ContentVerifierModule.MODULE_NAME;
+    }
+    public id = ContentVerifierModule.MODULE_ID;
     public endpoint = new ContentVerifierEndpoint(this.stores, this.offchainStores);
     public method = new ContentVerifierMethod(this.stores, this.events);
     public commands = [new CreateContentCommand(this.stores, this.events)];
@@ -23,6 +29,7 @@ export class ContentVerifierModule extends Modules.BaseModule {
         super();
         this.stores.register(ContentStore, new ContentStore(this.name, 0));
         this.stores.register(StatsStore, new StatsStore(this.name, 1));
+        this.stores.register(UserReputationStore, new UserReputationStore(this.name, 2));
         this.maxContentLength = 1000;
         this.minReputationForVerification = 0.5;
     }
@@ -37,15 +44,20 @@ export class ContentVerifierModule extends Modules.BaseModule {
             ...this.baseMetadata(),
             endpoints: [
                 {
-                    name: 'submitContent',
-                    request: this.getSubmitContentSchema(),
-                    response: this.getSubmitContentResponseSchema(),
+                    name: 'getContent',
+                    request: this.getContentSchema(),
+                    response: this.getContentResponseSchema(),
                 },
                 {
-                    name: 'verifyContent',
-                    request: this.getVerifyContentSchema(),
-                    response: this.getVerifyContentResponseSchema(),
+                    name: 'getStats',
+                    request: this.getStatsSchema(),
+                    response: this.getStatsResponseSchema(),
                 },
+                // {
+                //     name: 'verifyContent',
+                //     request: this.getVerifyContentSchema(),
+                //     response: this.getVerifyContentResponseSchema(),
+                // },
                 {
                     name: 'getReputation',
                     request: this.getReputationSchema(),
@@ -53,78 +65,100 @@ export class ContentVerifierModule extends Modules.BaseModule {
                 },
             ],
             assets: [],
+            stores: [],
         };
     }
 
-	private getSubmitContentSchema() {
+	// Add schema methods for each endpoint
+    public getContentSchema() {
         return {
-            $id: '/contentVerifier/submitContent',
+            $id: 'contentVerifier/getContent',
             type: 'object',
-            required: ['hash', 'userId', 'timestamp'],
             properties: {
                 hash: {
                     dataType: 'string',
                     fieldNumber: 1,
                 },
+            },
+            required: ['hash'],
+        };
+    }
+
+    public getStatsSchema() {
+        return {
+            $id: 'contentVerifier/getStats',
+            type: 'object',
+            properties: {},
+        };
+    }
+
+    public verifyContentSchema() {
+        return {
+            $id: 'contentVerifier/verifyContent',
+            type: 'object',
+            properties: {
+                hash: {
+                    dataType: 'string',
+                    fieldNumber: 1,
+                },
+            },
+            required: ['hash'],
+        };
+    }
+
+    // Response schemas
+    public getContentResponseSchema() {
+        return {
+            $id: 'contentVerifier/getContentResponse',
+            type: 'object',
+            properties: {
                 userId: {
                     dataType: 'string',
-                    fieldNumber: 2,
+                    fieldNumber: 1,
                 },
                 timestamp: {
                     dataType: 'uint32',
+                    fieldNumber: 2,
+                },
+                verified: {
+                    dataType: 'boolean',
                     fieldNumber: 3,
                 },
             },
         };
     }
 
-	private getSubmitContentResponseSchema() {
+    public getStatsResponseSchema() {
         return {
-            $id: '/contentVerifier/submitContentResponse',
+            $id: 'contentVerifier/getStatsResponse',
             type: 'object',
-            required: ['success'],
             properties: {
-                success: {
-                    dataType: 'boolean',
+                totalContents: {
+                    dataType: 'uint32',
                     fieldNumber: 1,
                 },
-            },
-        };
-    }
-
-	private getVerifyContentSchema() {
-        return {
-            $id: '/contentVerifier/verifyContent',
-            type: 'object',
-            required: ['hash'],
-            properties: {
-                hash: {
-                    dataType: 'string',
-                    fieldNumber: 1,
-                },
-            },
-        };
-    }
-
-    private getVerifyContentResponseSchema() {
-        return {
-            $id: '/contentVerifier/verifyContentResponse',
-            type: 'object',
-            required: ['success', 'verified'],
-            properties: {
-                success: {
-                    dataType: 'boolean',
-                    fieldNumber: 1,
-                },
-                verified: {
-                    dataType: 'boolean',
+                verifiedContents: {
+                    dataType: 'uint32',
                     fieldNumber: 2,
                 },
             },
         };
     }
 
-    private getReputationSchema() {
+    public verifyContentResponseSchema() {
+        return {
+            $id: 'contentVerifier/verifyContentResponse',
+            type: 'object',
+            properties: {
+                success: {
+                    dataType: 'boolean',
+                    fieldNumber: 1,
+                },
+            },
+        };
+    }
+
+    public getReputationSchema() {
         return {
             $id: '/contentVerifier/getReputation',
             type: 'object',
@@ -138,7 +172,7 @@ export class ContentVerifierModule extends Modules.BaseModule {
         };
     }
 
-    private getReputationResponseSchema() {
+    public getReputationResponseSchema() {
         return {
             $id: '/contentVerifier/getReputationResponse',
             type: 'object',
@@ -174,7 +208,13 @@ export class ContentVerifierModule extends Modules.BaseModule {
             this.minReputationForVerification = moduleConfig.minReputationForVerification ?? this.minReputationForVerification;
         }
     
+        // this.endpoint.registerEndpoints();
         // Other initialization logic...
+    }
+
+    // eslint-disable-next-line @typescript-eslint/require-await
+    public async verifyTransaction(_context: StateMachine.TransactionVerifyContext): Promise<StateMachine.VerificationResult> {
+        return { status: StateMachine.VerifyStatus.OK };
     }
 
 	// public async insertAssets(_context: StateMachine.InsertAssetContext) {

@@ -1,0 +1,8 @@
+{
+	"jsonrpc": "2.0",
+	"id": 1,
+	"method": "contentVerifier_verifyContent",
+	"params": {
+		"hash": "QmX4n5qKvqrA1JQFYqsdqhULtVXF6YHiH3CfDFX1YcBxEn"
+	}
+}

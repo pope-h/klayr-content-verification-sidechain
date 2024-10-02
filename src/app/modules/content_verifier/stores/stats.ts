@@ -6,7 +6,7 @@ export interface ContentStats {
 }
 
 export const ContentStatsSchema = {
-        $id: '/contentVerifier/stats',
+        $id: '/contentVerifier/contentStats',
         type: 'object',
         required: ['totalContents', 'verifiedContents'],
         properties: {

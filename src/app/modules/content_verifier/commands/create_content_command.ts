@@ -6,6 +6,7 @@ import {
 } from 'klayr-sdk';
 import { ContentStore, ContentEntry } from '../stores/content';
 import { StatsStore, ContentStats } from '../stores/stats';
+import { UserReputationStore } from '../stores/user_reputation';
 
 interface Params {
     hash: string;
@@ -46,6 +47,7 @@ export class CreateContentCommand extends Modules.BaseCommand {
         
         const contentStore = this.stores.get(ContentStore);
         const statsStore = this.stores.get(StatsStore);
+		const userReputationStore = this.stores.get(UserReputationStore);
 
         // Create new content entry
         const newContent: ContentEntry = {
@@ -67,5 +69,13 @@ export class CreateContentCommand extends Modules.BaseCommand {
 
         stats.totalContents += 1;
 		await statsStore.set(context, Buffer.from('globalStats'), stats);
+
+		// Update user reputation
+    	let userReputation = await userReputationStore.get(context, Buffer.from(userId));
+    	if (!userReputation) {
+        	userReputation = { userId, totalSubmissions: 0, verifiedSubmissions: 0 };
+    	}
+    	userReputation.totalSubmissions += 1;
+    	await userReputationStore.set(context, Buffer.from(userId), userReputation);
 	}
 }
