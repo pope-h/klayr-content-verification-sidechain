@@ -60,6 +60,11 @@ http://localhost:7887
 ./bin/run transaction:create contentVerifier createContent 10000000 --params='{"hash":"QmX4n5qKvqrA1JQFYqsdqhULtVXF6YHiH3CfDFX1YcBxEn", "userId":"user123", "timestamp":1633036800}' --json --pretty
 ```
 
+### Send the created transaction
+```
+./bin/run transaction:send <binary_transaction_output>
+```
+
 ### Verify Content:
 ```
 ./bin/run transaction:create contentVerifier verifyContent 10000000 --params='{"hash":"QmX4n5qKvqrA1JQFYqsdqhULtVXF6YHiH3CfDFX1YcBxEn"}' --json --pretty
@@ -87,7 +92,7 @@ curl -X POST -H "Content-Type: application/json" -d @./test/api/getReputation.js
 
 ## Future Improvements
 
-- Implement content verification logic
+- Implement more secure content verification logic
 - Add more robust error handling and input validation
 - Implement a proper consensus mechanism for block creation
 - Add comprehensive testing

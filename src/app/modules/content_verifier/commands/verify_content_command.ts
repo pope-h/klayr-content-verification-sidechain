@@ -5,7 +5,7 @@ import {
 } from 'klayr-sdk';
 import { ContentStore, ContentEntry } from '../stores/content';
 import { StatsStore, ContentStats } from '../stores/stats';
-import { UserReputationStore } from '../stores/user_reputation';
+import { UserReputationStore, UserReputation } from '../stores/user_reputation';
 
 interface Params {
     hash: string;
@@ -26,8 +26,19 @@ export const verifyContentSchema = {
 export class VerifyContentCommand extends Modules.BaseCommand {
     public schema = verifyContentSchema;
 
-    // eslint-disable-next-line @typescript-eslint/require-await
-    public async verify(_context: StateMachine.CommandVerifyContext<Params>): Promise<StateMachine.VerificationResult> {
+    public async verify(context: StateMachine.CommandVerifyContext<Params>): Promise<StateMachine.VerificationResult> {
+        const { hash } = context.params;
+        const contentStore = this.stores.get(ContentStore);
+
+        try {
+            await contentStore.get(context, Buffer.from(hash));
+        } catch (error) {
+            return {
+                status: StateMachine.VerifyStatus.FAIL,
+                error: new Error('Content not found'),
+            };
+        }
+
         return { status: StateMachine.VerifyStatus.OK };
     }
 
@@ -39,12 +50,7 @@ export class VerifyContentCommand extends Modules.BaseCommand {
         const userReputationStore = this.stores.get(UserReputationStore);
 
         // Get the content
-        let content: ContentEntry;
-        try {
-            content = await contentStore.get(context, Buffer.from(hash));
-        } catch (error) {
-            throw new Error('Content not found');
-        }
+        const content: ContentEntry = await contentStore.get(context, Buffer.from(hash));
 
         // If content is already verified, do nothing
         if (content.verified) {
@@ -66,8 +72,10 @@ export class VerifyContentCommand extends Modules.BaseCommand {
         await statsStore.set(context, Buffer.from('globalStats'), stats);
 
         // Update user reputation
-        let userReputation = await userReputationStore.get(context, Buffer.from(content.userId));
-        if (!userReputation) {
+        let userReputation: UserReputation;
+        try {
+            userReputation = await userReputationStore.get(context, Buffer.from(content.userId));
+        } catch (error) {
             userReputation = { userId: content.userId, totalSubmissions: 0, verifiedSubmissions: 0 };
         }
         userReputation.verifiedSubmissions += 1;

@@ -6,7 +6,7 @@ import {
 } from 'klayr-sdk';
 import { ContentStore, ContentEntry } from '../stores/content';
 import { StatsStore, ContentStats } from '../stores/stats';
-import { UserReputationStore } from '../stores/user_reputation';
+import { UserReputationStore, UserReputation } from '../stores/user_reputation';
 
 interface Params {
     hash: string;
@@ -61,21 +61,22 @@ export class CreateContentCommand extends Modules.BaseCommand {
 
 		// Update stats
 		let stats: ContentStats;
-		try {
-			stats = await statsStore.get(context, Buffer.from('globalStats'));
-		} catch (error) {
-			stats = { totalContents: 0, verifiedContents: 0 };
-		}
-
+        try {
+            stats = await statsStore.get(context, Buffer.from('globalStats'));
+        } catch (error) {
+            stats = { totalContents: 0, verifiedContents: 0 };
+        }
         stats.totalContents += 1;
-		await statsStore.set(context, Buffer.from('globalStats'), stats);
+        await statsStore.set(context, Buffer.from('globalStats'), stats);
 
-		// Update user reputation
-    	let userReputation = await userReputationStore.get(context, Buffer.from(userId));
-    	if (!userReputation) {
-        	userReputation = { userId, totalSubmissions: 0, verifiedSubmissions: 0 };
-    	}
-    	userReputation.totalSubmissions += 1;
-    	await userReputationStore.set(context, Buffer.from(userId), userReputation);
+        // Update user reputation
+        let userReputation: UserReputation;
+        try {
+            userReputation = await userReputationStore.get(context, Buffer.from(userId));
+        } catch (error) {
+            userReputation = { userId, totalSubmissions: 0, verifiedSubmissions: 0 };
+        }
+        userReputation.totalSubmissions += 1;
+        await userReputationStore.set(context, Buffer.from(userId), userReputation);
 	}
 }
