@@ -38,8 +38,8 @@ npm run build
 ```
 
 ## Running the Sidechain
-### Start a node
 
+### Start a node
 ```
 ./bin/run start --config=config/custom_config.json
 ```
@@ -50,6 +50,7 @@ http://localhost:7887
 ```
 
 ## Interacting with the Sidechain
+
 ### Here are some example commands to interact with the sidechain:
 
 ### Create content
@@ -58,25 +59,21 @@ http://localhost:7887
 ```
 
 ### Send the created transaction
-
 ```
 ./bin/run transaction:send <binary_transaction_output>
 ```
 
 ### Get content
-
 ```
 curl -X POST -H "Content-Type: application/json" -d @./test/api/getContent.json http://localhost:7887/rpc
 ```
 
 ### Get stats
-
 ```
 curl -X POST -H "Content-Type: application/json" -d @./test/api/getStats.json http://localhost:7887/rpc
 ```
 
 ### Get user reputation
-
 ```
 curl -X POST -H "Content-Type: application/json" -d @./test/api/getReputation.json http://localhost:7887/rpc
 ```
