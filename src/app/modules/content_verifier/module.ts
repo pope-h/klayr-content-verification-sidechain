@@ -9,6 +9,7 @@ import { ContentVerifierMethod } from './method';
 import { ContentStore } from './stores/content';
 import { StatsStore } from './stores/stats';
 import { UserReputationStore } from './stores/user_reputation';
+import { VerifyContentCommand } from './commands/verify_content_command';
 
 export class ContentVerifierModule extends Modules.BaseModule {
 	public static readonly MODULE_NAME = 'contentVerifier';
@@ -20,7 +21,10 @@ export class ContentVerifierModule extends Modules.BaseModule {
     public id = ContentVerifierModule.MODULE_ID;
     public endpoint = new ContentVerifierEndpoint(this.stores, this.offchainStores);
     public method = new ContentVerifierMethod(this.stores, this.events);
-    public commands = [new CreateContentCommand(this.stores, this.events)];
+    public commands = [
+        new CreateContentCommand(this.stores, this.events),
+        new VerifyContentCommand(this.stores, this.events)
+    ];
 
     private maxContentLength: number;
     private minReputationForVerification: number;
@@ -53,11 +57,11 @@ export class ContentVerifierModule extends Modules.BaseModule {
                     request: this.getStatsSchema(),
                     response: this.getStatsResponseSchema(),
                 },
-                // {
-                //     name: 'verifyContent',
-                //     request: this.getVerifyContentSchema(),
-                //     response: this.getVerifyContentResponseSchema(),
-                // },
+                {
+                    name: 'verifyContent',
+                    request: this.verifyContentSchema(),
+                    response: this.verifyContentResponseSchema(),
+                },
                 {
                     name: 'getReputation',
                     request: this.getReputationSchema(),

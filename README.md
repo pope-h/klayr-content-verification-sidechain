@@ -53,9 +53,16 @@ http://localhost:7887
 
 ### Here are some example commands to interact with the sidechain:
 
+- NOTE that a passPhrase is needed to create the transaction.
+
 ### Create content
 ```
 ./bin/run transaction:create contentVerifier createContent 10000000 --params='{"hash":"QmX4n5qKvqrA1JQFYqsdqhULtVXF6YHiH3CfDFX1YcBxEn", "userId":"user123", "timestamp":1633036800}' --json --pretty
+```
+
+### Verify Content:
+```
+./bin/run transaction:create contentVerifier verifyContent 10000000 --params='{"hash":"QmX4n5qKvqrA1JQFYqsdqhULtVXF6YHiH3CfDFX1YcBxEn"}' --json --pretty
 ```
 
 ### Send the created transaction
